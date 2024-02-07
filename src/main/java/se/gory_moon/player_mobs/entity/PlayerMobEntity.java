@@ -159,7 +159,7 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
             var stack = ItemManager.INSTANCE.getRandomMainHand(pRandom);
             setItemSlot(EquipmentSlot.MAINHAND, stack);
 
-            if (level().getDifficulty().getId() >= Configs.COMMON.offhandDifficultyLimit.get().getId() && pRandom.nextDouble() > Configs.COMMON.offhandSpawnChance.get()) {
+            if (level().getDifficulty().getId() >= Configs.COMMON.offhandDifficultyLimit.get().getId() && pRandom.nextDouble() < Configs.COMMON.offhandSpawnChance.get()) {
                 if (stack.getItem() instanceof ProjectileWeaponItem && Configs.COMMON.allowTippedArrows.get()) {
                     var potions = new ArrayList<>(ForgeRegistries.POTIONS.getKeys());
                     potions.removeAll(Configs.COMMON.tippedArrowBlocklist);
@@ -168,8 +168,11 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
                         setItemSlot(EquipmentSlot.OFFHAND, PotionUtils.setPotion(new ItemStack(Items.TIPPED_ARROW), potion));
                     }
                 } else {
-                    setItemSlot(EquipmentSlot.OFFHAND, ItemManager.INSTANCE.getRandomOffHand(pRandom));
-                    getAttribute(Attributes.MAX_HEALTH).addPermanentModifier(new AttributeModifier("Shield Bonus", pRandom.nextDouble() * 3.0 + 1.0, AttributeModifier.Operation.MULTIPLY_TOTAL));
+                    var offHandStack = ItemManager.INSTANCE.getRandomOffHand(pRandom);
+                    setItemSlot(EquipmentSlot.OFFHAND, offHandStack);
+                    if (offHandStack.getItem() instanceof ShieldItem) {
+                        getAttribute(Attributes.MAX_HEALTH).addPermanentModifier(new AttributeModifier("Shield Bonus", pRandom.nextDouble() * 3.0 + 1.0, AttributeModifier.Operation.MULTIPLY_TOTAL));
+                    }
                 }
             }
         }
